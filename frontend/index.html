@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CORS Test Frontend</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 900px;
+        margin: 40px auto;
+        line-height: 1.5;
+      }
+
+      button {
+        margin-right: 8px;
+        margin-bottom: 8px;
+        padding: 10px 14px;
+        cursor: pointer;
+      }
+
+      pre {
+        background: #f4f4f4;
+        padding: 12px;
+        border-radius: 6px;
+        overflow-x: auto;
+      }
+
+      .hint {
+        color: #444;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>CORS 테스트 프론트 (a.com 역할)</h1>
+
+    <p class="hint">
+      백엔드 URL(<code>b.com</code> 역할):
+      <input id="apiUrl" value="http://localhost:4000/api/hello" style="width: 380px" />
+    </p>
+
+    <button id="simpleBtn">Call API (Simple GET)</button>
+    <button id="preflightBtn">Call API (Preflight: custom header)</button>
+
+    <h3>결과</h3>
+    <pre id="output">아직 요청 없음</pre>
+
+    <script>
+      const out = document.getElementById('output');
+      const apiUrl = document.getElementById('apiUrl');
+
+      async function callSimple() {
+        out.textContent = '요청 중...';
+        try {
+          const res = await fetch(apiUrl.value, {
+            method: 'GET'
+          });
+          const body = await res.text();
+          out.textContent = `status=${res.status}\n\n${body}`;
+        } catch (err) {
+          out.textContent = `요청 실패 (브라우저 CORS 차단 가능):\n${err}`;
+        }
+      }
+
+      async function callPreflight() {
+        out.textContent = '요청 중...';
+        try {
+          const res = await fetch(apiUrl.value, {
+            method: 'GET',
+            headers: {
+              'X-Demo-Header': 'cors-preflight-test',
+              'Content-Type': 'application/json'
+            }
+          });
+          const body = await res.text();
+          out.textContent = `status=${res.status}\n\n${body}`;
+        } catch (err) {
+          out.textContent = `요청 실패 (preflight/CORS 이슈 가능):\n${err}`;
+        }
+      }
+
+      document.getElementById('simpleBtn').addEventListener('click', callSimple);
+      document.getElementById('preflightBtn').addEventListener('click', callPreflight);
+    </script>
+  </body>
+</html>
